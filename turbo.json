@@ -1,0 +1,13 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "tasks": {
+    "refresh": {
+      "outputs": [
+        "node_modules"
+      ]
+    },
+    "test": {
+      "dependsOn": ["refresh"]
+    }
+  }
+}

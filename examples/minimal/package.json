@@ -1,0 +1,8 @@
+{
+  "name": "y1-example-minimal",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "true",
+    "fail": "exit 123"
+  }
+}

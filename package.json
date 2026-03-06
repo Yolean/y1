@@ -1,0 +1,14 @@
+{
+  "name": "yarn-1-task-runner",
+  "license": "Apache-2.0",
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "refresh": "npm install --strict-peer-deps",
+    "test:all": "echo $PATH | grep /target/devbin/ && echo todo-actual-test-coverage-and-e2e",
+    "test": "PATH=$PATH:$PWD/target/devbin/ ./node_modules/.bin/yarn run test:all"
+  },
+  "devDependencies": {
+    "turbo": "2.8.20",
+    "yarn": "1.22.22"
+  }
+}
