@@ -78,7 +78,7 @@ apply_deviations() {
 
 # --- manual fixture dirs (preserved across regeneration) ---
 
-MANUAL_CASES=(no-args rejected-install)
+MANUAL_CASES=(no-args rejected-install help help-run)
 
 # --- clean generated dirs ---
 
@@ -111,22 +111,14 @@ generate_case "run-no-task" "examples/minimal" run
 # Shorthand (yarn test = yarn run test)
 generate_case "shorthand-test" "examples/minimal" test
 
-# Help
-generate_case "help" "examples/minimal" help
-generate_case "help-run" "examples/minimal" help run
-
-# Rejected cases — not run through yarn (they trigger dependency management side effects).
-# expected-* files are maintained manually.
-echo "  skipped: no-args (rejected, manual fixtures)"
-echo "  skipped: rejected-install (rejected, manual fixtures)"
+# Manual fixture cases — not generated, maintained by hand.
+echo "  skipped: help (manual fixtures)"
+echo "  skipped: help-run (manual fixtures)"
+echo "  skipped: no-args (manual fixtures)"
+echo "  skipped: rejected-install (manual fixtures)"
 
 echo ""
 echo "Fixtures generated in $FIXTURES_DIR/"
-echo ""
-echo "MANUAL REVIEW REQUIRED for these cases:"
-echo "  no-args         — y1 exits 99 with 'requires a subcommand' (differs from yarn)"
-echo "  rejected-install — y1 exits 99 with 'rejected: install' (differs from yarn)"
-echo "  help, help-run  — y1 filters unsupported flags/commands (needs manual edit)"
 
 # Check for yarn.lock side effects from running yarn v1
 lockfiles=$(find "$REPO_ROOT" -name yarn.lock -not -path '*/node_modules/*' -not -path '*/.git/*')
