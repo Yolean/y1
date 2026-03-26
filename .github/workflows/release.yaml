@@ -5,7 +5,11 @@ on:
     tags: ['*']
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yaml
+
   build:
+    needs: ci
     strategy:
       matrix:
         include:
