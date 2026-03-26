@@ -16,9 +16,11 @@ fn y1_binary() -> PathBuf {
 }
 
 fn normalize_output(s: &str) -> String {
-    // Normalize timing: "Done in 0.02s." -> "Done in {DURATION}."
-    let re = regex::Regex::new(r"Done in \d+\.\d+s\.").unwrap();
-    let s = re.replace_all(s, "Done in {DURATION}.").to_string();
+    // Normalize only the duration number, preserving all surrounding bytes.
+    // "Done in 0.02s." becomes "Done in {DURATION}."
+    // The prefix "Done in " and suffix "s." must match byte-for-byte.
+    let re = regex::Regex::new(r"(Done in )\d+\.\d+(s\.)").unwrap();
+    let s = re.replace_all(s, "${1}{DURATION}.").to_string();
     // Normalize cwd references
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
     s.replace(manifest_dir, "{CWD}")
@@ -88,6 +90,49 @@ fn run_fixture_case(case_dir: &Path) {
         actual_stderr, expected_stderr,
         "[{case_name}] stderr mismatch"
     );
+}
+
+/// Verify that expected-stdout matches yarn-stdout byte-for-byte after applying
+/// the same deviations the generator applies (strip info Visit lines, normalize timing).
+/// Only checks generated fixtures (those with yarn-* files).
+/// This catches any unintentional drift between y1's output format and yarn's.
+#[test]
+fn yarn_byte_fidelity() {
+    let cases = discover_fixture_cases();
+
+    fn apply_deviations(s: &str) -> String {
+        s.lines()
+            .filter(|line| !line.starts_with("info Visit https://yarnpkg.com/en/docs/cli/"))
+            .filter(|line| !line.starts_with("  Visit https://yarnpkg.com/en/docs/cli/"))
+            .collect::<Vec<_>>()
+            .join("\n")
+            + "\n"
+    }
+
+    let mut failures = Vec::new();
+    for case in &cases {
+        let name = case.file_name().unwrap().to_str().unwrap();
+        let yarn_stdout_path = case.join("yarn-stdout");
+        if !yarn_stdout_path.exists() {
+            continue; // manual fixture, no yarn reference
+        }
+        let yarn_stdout = apply_deviations(&read_fixture_file(&yarn_stdout_path));
+        let expected_stdout = read_fixture_file(&case.join("expected-stdout"));
+
+        if yarn_stdout.as_bytes() != expected_stdout.as_bytes() {
+            failures.push(format!(
+                "  {name}: yarn-stdout (after deviations) and expected-stdout differ at byte level"
+            ));
+        }
+    }
+
+    if !failures.is_empty() {
+        panic!(
+            "Byte fidelity check failed for {} fixture(s):\n{}",
+            failures.len(),
+            failures.join("\n")
+        );
+    }
 }
 
 #[test]
