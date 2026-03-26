@@ -102,6 +102,6 @@ Multi-arch builds (linux + mac and arm64 + amd64) using github action with pegge
 
 Releases on tags using github actions, with uncompressed single binary downloads and a checksum file.
 
-## Running original yarn during developmen
+## Running original yarn during development
 
 For example: `npm run refresh >/dev/null && (cd examples/minimal; ../../node_modules/.bin/yarn test)`
