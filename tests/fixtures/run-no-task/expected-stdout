@@ -1,0 +1,9 @@
+yarn run v1.22.22
+info Project commands
+   - fail
+      exit 123
+   - stdout-stderr
+      echo to-stdout && echo to-stderr >&2
+   - test
+      true
+Done in {DURATION}.

@@ -1,0 +1,4 @@
+yarn run v1.22.22
+$ echo to-stdout && echo to-stderr >&2
+to-stdout
+Done in {DURATION}.

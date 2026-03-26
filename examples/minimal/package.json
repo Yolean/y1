@@ -3,6 +3,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "test": "true",
-    "fail": "exit 123"
+    "fail": "exit 123",
+    "stdout-stderr": "echo to-stdout && echo to-stderr >&2"
   }
 }

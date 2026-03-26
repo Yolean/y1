@@ -27,6 +27,11 @@ $ true
 yarn run test  0.11s user 0.03s system 98% cpu 0.141 total
 ```
 
+## Output ordering
+
+y1's own messages (the yarn-emulated header, status, and error lines) are printed stdout-first then stderr.
+Task passthrough output preserves the task's original stream ordering.
+
 ## Reliable signals
 
 We need a way to catch the result of every single task through logs.

@@ -4,7 +4,7 @@
   "packageManager": "yarn@1.22.22",
   "scripts": {
     "refresh": "npm install --strict-peer-deps",
-    "test:all": "echo $PATH | grep /target/devbin/ && echo todo-actual-test-coverage-and-e2e",
+    "test:all": "echo $PATH | grep /target/devbin/ && cargo test",
     "test": "PATH=$PATH:$PWD/target/devbin/ ./node_modules/.bin/yarn run test:all"
   },
   "devDependencies": {
