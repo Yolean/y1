@@ -13,7 +13,7 @@ fn parse_allowed(allowed_env: &str, separator: &str) -> Vec<String> {
 }
 
 fn find_system_npx() -> Option<std::path::PathBuf> {
-    let self_exe = std::fs::canonicalize("/proc/self/exe").ok();
+    let self_exe = std::env::current_exe().ok().and_then(|p| std::fs::canonicalize(p).ok());
     let path_var = std::env::var("PATH").unwrap_or_default();
     for dir in path_var.split(':') {
         let candidate = std::path::Path::new(dir).join("npx");
@@ -33,6 +33,11 @@ fn find_system_npx() -> Option<std::path::PathBuf> {
 }
 
 pub fn run() -> ExitCode {
+    if std::env::var_os("Y_NPX_WRAPPER").is_some() {
+        eprintln!("y-npx: loop detected (re-entered via exec), aborting");
+        return ExitCode::from(1);
+    }
+
     let args: Vec<String> = std::env::args().skip(1).collect();
     let invocation = normalize(&args.join(" "));
 
@@ -64,12 +69,18 @@ pub fn run() -> ExitCode {
 #[cfg(unix)]
 fn exec(path: &std::path::Path, args: &[String]) -> std::io::Error {
     use std::os::unix::process::CommandExt;
-    std::process::Command::new(path).args(args).exec()
+    std::process::Command::new(path)
+        .args(args)
+        .env("Y_NPX_WRAPPER", "y1")
+        .exec()
 }
 
 #[cfg(not(unix))]
 fn exec(path: &std::path::Path, args: &[String]) -> std::io::Error {
-    match std::process::Command::new(path).args(args).status() {
+    match std::process::Command::new(path)
+        .args(args)
+        .env("Y_NPX_WRAPPER", "y1")
+        .status() {
         Ok(status) => std::process::exit(status.code().unwrap_or(1)),
         Err(e) => e,
     }
