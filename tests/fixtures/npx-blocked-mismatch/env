@@ -1,0 +1,1 @@
+Y_NPX_ALLOWED_CMDS=tsc --noEmit,eslint .

@@ -51,6 +51,31 @@ fn discover_fixture_cases() -> Vec<PathBuf> {
     cases
 }
 
+fn parse_fixture_env(case_dir: &Path) -> Vec<(String, String)> {
+    let content = read_fixture_file(&case_dir.join("env"));
+    content
+        .lines()
+        .filter(|l| !l.is_empty() && !l.starts_with('#'))
+        .filter_map(|line| {
+            let (key, value) = line.split_once('=')?;
+            Some((key.to_string(), value.to_string()))
+        })
+        .collect()
+}
+
+fn setup_argv0_symlink(case_dir: &Path) -> Option<PathBuf> {
+    let content = read_fixture_file(&case_dir.join("argv0"));
+    let name = content.trim();
+    if name.is_empty() {
+        return None;
+    }
+    let link_path = case_dir.join(name);
+    // Remove stale symlink if present
+    let _ = fs::remove_file(&link_path);
+    std::os::unix::fs::symlink(y1_binary(), &link_path).unwrap();
+    Some(link_path)
+}
+
 fn run_fixture_case(case_dir: &Path) {
     let case_name = case_dir.file_name().unwrap().to_str().unwrap();
 
@@ -68,9 +93,17 @@ fn run_fixture_case(case_dir: &Path) {
         .parse()
         .unwrap_or(0);
 
-    let output = Command::new(y1_binary())
-        .args(&args)
-        .current_dir(&working_dir)
+    let env_vars = parse_fixture_env(case_dir);
+    let symlink = setup_argv0_symlink(case_dir);
+    let default_binary = y1_binary();
+    let binary = symlink.as_deref().unwrap_or(&default_binary);
+
+    let mut cmd = Command::new(binary);
+    cmd.args(&args).current_dir(&working_dir);
+    for (key, value) in &env_vars {
+        cmd.env(key, value);
+    }
+    let output = cmd
         .output()
         .unwrap_or_else(|e| panic!("[{case_name}] failed to execute y1: {e}"));
 

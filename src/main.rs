@@ -1,11 +1,25 @@
 mod commands;
 mod help;
+mod npx;
 mod package_json;
 mod run;
 
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
+    let argv0 = std::env::args().next().unwrap_or_default();
+    let bin_name = std::path::Path::new(&argv0)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("");
+
+    match bin_name {
+        "npx" | "y-npx" => npx::run(),
+        _ => yarn_main(),
+    }
+}
+
+fn yarn_main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
 
     match commands::classify(&args) {

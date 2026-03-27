@@ -94,6 +94,35 @@ Similar to the original help but:
 
 Samp principle as [Help section](#help-section).
 
+## npx gate mode
+
+y1 doubles as an npx gate when invoked as `npx` or `y-npx` (detected via argv[0]).
+Instead of running npx freely, it blocks any invocation whose arguments are not explicitly whitelisted.
+
+### Y_NPX_ALLOWED_CMDS
+
+Comma-separated list of allowed arg strings. Each entry is compared exactly (after whitespace normalization) against the full args passed to npx.
+
+```
+Y_NPX_ALLOWED_CMDS="tsc --noEmit,eslint ."
+```
+
+Only `npx tsc --noEmit` and `npx eslint .` are allowed. Everything else is blocked with:
+
+```
+y-npx blocked npx because `[args]` not found in Y_NPX_ALLOWED_CMDS (use installed tools)
+```
+
+Exit code on block: 1.
+
+### Y_NPX_ALLOWED_CMDS_SEPARATOR
+
+Override the separator (default: `,`). Useful if an allowed command itself contains commas.
+
+### Allowed invocations
+
+When the args match an entry, y1 finds the system npx (skipping itself in PATH) and exec's into it, preserving all original arguments.
+
 ## Development tooling
 
 A CLI written in latest Rust.
